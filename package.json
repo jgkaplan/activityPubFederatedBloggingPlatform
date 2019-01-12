@@ -1,0 +1,21 @@
+{
+  "name": "activitypubbloggingplatform",
+  "version": "1.0.0",
+  "description": "A federated blogging platform built on the activity pub format",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "compression": "^1.7.3",
+    "connect-mongo": "^2.0.3",
+    "express": "^4.16.4",
+    "express-session": "^1.15.6",
+    "monk": "^6.0.6",
+    "passport": "^0.4.0",
+    "serve-favicon": "^2.5.0",
+    "spdy": "^4.0.0"
+  }
+}

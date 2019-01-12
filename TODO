@@ -1,0 +1,17 @@
+ROADMAP
+=======
+Dashboard
+    -get recent posts
+    -get more posts when scrolling down
+    -display posts
+        -videos
+        -images
+        -text
+        -quotes
+        -audio
+    -like
+    -reblog
+    
+Send and receive private messages
+
+Custom blog
