@@ -1,7 +1,9 @@
 Requirements
 ============
 Potentially openssl if you want to generate a server certificate yourself
+
 Or LetsEncrypt
+
 Mongodb
 
 Before running
