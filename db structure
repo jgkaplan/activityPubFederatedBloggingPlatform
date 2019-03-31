@@ -1,0 +1,33 @@
+Users
+{
+    id,
+    name,
+    password,
+    summary,
+    preferredUsername,
+    publicKey,
+    privateKey,
+    keyCreationDate,
+    icon
+}
+
+{"@context": "https://www.w3.org/ns/activitystreams",
+    "type": "Person",
+    "id": "https://social.example/alyssa/",
+    "name": "Alyssa P. Hacker",
+    "preferredUsername": "alyssa",
+    "summary": "Lisp enthusiast hailing from MIT",
+    "inbox": "https://social.example/alyssa/inbox/",
+    "outbox": "https://social.example/alyssa/outbox/",
+    "followers": "https://social.example/alyssa/followers/",
+    "following": "https://social.example/alyssa/following/",
+    "likes": "https://social.example/alyssa/likes/"}
+    "publicKey": {
+        "id": "https://my-example.com/actor#main-key",
+        "owner": "https://my-example.com/actor",
+        "publicKeyPem": "-----BEGIN PUBLIC KEY-----...-----END PUBLIC KEY-----"
+    },
+    "icon": [
+        "https://kenzoishii.example.com/image/165987aklre4"
+    ]
+}

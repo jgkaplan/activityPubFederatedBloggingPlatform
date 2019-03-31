@@ -1,17 +1,58 @@
 ROADMAP
 =======
-Dashboard
-    -get recent posts
-    -get more posts when scrolling down
-    -display posts
-        -videos
-        -images
-        -text
-        -quotes
-        -audio
-    -like
-    -reblog
-    
-Send and receive private messages
+Pages
+    Dashboard
+        -get recent posts
+        -get more posts when scrolling down
+        -display posts
+            -videos
+            -images
+            -text
+            -quotes
+            -audio
+            -link
+            -chat?
+        -like
+        -reblog
 
-Custom blog
+    HomePage
+
+    Sign up
+
+    Login
+
+    Custom blogs
+        -likes (visibility optional)
+        -followers
+        -following (visibility optional)
+    Messages
+
+    Chat?
+
+    Search
+
+Admin
+    -ban user
+    -delete account
+    -mark posts as sensitive (permanent)
+    -tag a post
+
+Multiple processes
+
+Allow user/admin to specify tags to block. The posts will show up as sensitive
+
+NSFW filter
+
+Tag posts
+
+subdomains
+    -username.domainname.com should retrieve the blog of <username>
+    domainname.com/user/username
+
+Security and safety
+    -rate limiting
+    -authentication
+    -trust for content received from other servers
+    -key expiration
+
+Add Caddy Support (https://caddyserver.com/)

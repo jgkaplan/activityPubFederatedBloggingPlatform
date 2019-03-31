@@ -1,0 +1,14 @@
+#domain goes here
+localhost:8000 {
+    gzip
+    log ./caddy_access.log
+    root ./web/
+}
+
+# localhost:8000/api/ {
+#     proxy / localhost:3000 {
+#         transparent
+#     }
+# }
+
+# *.localhost:800
