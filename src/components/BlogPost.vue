@@ -15,3 +15,15 @@ export default {
   props: ['post']
 }
 </script>
+
+<style scoped>
+    .post{
+        margin-top: 10px;
+        margin-bottom: 10px;
+        background-color: lightgray;
+        width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        min-height:100px;
+    }
+</style>

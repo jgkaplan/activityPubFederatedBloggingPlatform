@@ -14,6 +14,10 @@ const store = new Vuex.Store({
             id: 0,
             type: 'text',
             contents: 'What a wonderful world'
+        },{
+            id: 1,
+            type: 'text',
+            contents: 'This is my second post'
         }],
         jwt: null
     },
