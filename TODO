@@ -45,6 +45,10 @@ NSFW filter
 
 Tag posts
 
+favicon
+
+mobile app
+
 subdomains
     -username.domainname.com should retrieve the blog of <username>
     domainname.com/user/username
@@ -54,5 +58,6 @@ Security and safety
     -authentication
     -trust for content received from other servers
     -key expiration
-
-Add Caddy Support (https://caddyserver.com/)
+    -log out of all other browsers
+    -password reset
+    -limit size of posts

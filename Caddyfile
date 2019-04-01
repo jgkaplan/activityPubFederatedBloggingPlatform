@@ -3,6 +3,12 @@ localhost:8000 {
     gzip
     log ./caddy_access.log
     root ./web/
+
+    cors /.well-known/webfinger
+
+    proxy /.well-known/webfinger localhost:3000 {
+        transparent
+    }
 }
 
 # localhost:8000/api/ {

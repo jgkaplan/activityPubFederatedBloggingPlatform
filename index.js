@@ -1,16 +1,17 @@
 const config = require('./config.js');
-const spdy = require('spdy');
+// const spdy = require('spdy');
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const bodyParser = require('body-parser');
-const session = require('express-session');
-const favicon = require('serve-favicon');
+// const session = require('express-session');
+// const favicon = require('serve-favicon');
 // const MongoStore = require('connect-mongo')(session);
 const compression = require('compression');
 // const db = require('monk')(config.dbLocation);
 const { generateKeyPair } = require('crypto');
-const cors = require('cors');
+// const cors = require('cors');
+const jwt  = require('jsonwebtoken');
 
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
@@ -57,7 +58,7 @@ passport.use(new LocalStrategy({
 //                 return done(null, false);
 //                 // return done(null, false, {message: {"error": 'User already exists'}});
 //             }else{
-//                 bcrypt.hash(password, 8, function(err, hash){
+//                 bcrypt.hash(password, 12, function(err, hash){
 //                     if(err) return done(err);
 //                     Users.insert({
 //                         username: username,
@@ -102,20 +103,18 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(passport.initialize());
 // app.use(passport.session());
 
-app.get('/', (req, res) => {
-    res.end("meow");
-});
 
-app.options('/.well-known/webfinger', cors());
+// app.options('/.well-known/webfinger', cors());
 
-app.get('/.well-known/webfinger', cors(), (req, res) => {
+// cors
+app.get('/.well-known/webfinger', (req, res) => {
     let queryString = req.query.resource;
-    
+
 });
 
-app.get('/signup', (req, res) => {});
+app.get('/api/posts', (req, res) => {
 
-app.get('/login', (req, res) => {});
+});
 
 app.post('/signup', (req, res) => {
     // generateKeyPair('rsa',  {
@@ -138,17 +137,9 @@ app.post('/signup', (req, res) => {
 
 app.post('/login', (req, res) => {});
 
-app.get('/settings', (req, res) => {});
-
-app.get('/dashboard', (req, res) => {});
-
-app.get('/followers', (req, res) => {});
-
-app.get('/following', (req, res) => {});
-
-app.get('/logout', (req, res) => {
+app.post('/logout', (req, res) => {
     req.logout();
-    res.redirect('/');
+    // res.redirect('/');
 });
 
 
@@ -160,15 +151,17 @@ app.all('*', (req,res) => {
 //     res.status(404).end('404');
 // });
 
-const options = {
-    key: fs.readFileSync(config.serverKey),
-    cert:  fs.readFileSync(config.serverCert)
-};
+// const options = {
+//     key: fs.readFileSync(config.serverKey),
+//     cert:  fs.readFileSync(config.serverCert)
+// };
 
-spdy.createServer(options, app).listen(config.httpsPort, function(err){
-    if(err){
-        console.error(err);
-        return process.exit(1);
-    }
-    console.log(`Listening on port: ${config.httpsPort}`);
-});
+// spdy.createServer(options, app).listen(config.httpsPort, function(err){
+//     if(err){
+//         console.error(err);
+//         return process.exit(1);
+//     }
+//     console.log(`Listening on port: ${config.httpsPort}`);
+// });
+
+app.listen(config.httpPort);
