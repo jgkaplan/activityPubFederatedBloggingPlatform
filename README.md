@@ -10,6 +10,9 @@ Before running
 ==============
 Download caddy with http.cors, http.cache, http.ratelimit
 
+run `npm install`
+and `npm install -g @vue/cli`
+
 Create a server certificate by running the following commands
 ```
 openssl req -nodes -new -x509 -keyout server.key -out server.crt
