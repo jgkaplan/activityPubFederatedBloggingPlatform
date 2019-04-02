@@ -2,7 +2,7 @@
 localhost:8000 {
     gzip
     log ./caddy_access.log
-    root ./web/
+    root ./public/
 
     cors /.well-known/webfinger
 
