@@ -15,22 +15,26 @@ const jwt  = require('jsonwebtoken');
 
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+const JWTStrategy = require('passport-jwt').Strategy;
+const ExtractJWT = require('passport-jwt').ExtractJWT;
 const bcrypt = require('bcryptjs');
-passport.use(new LocalStrategy({
-    passReqToCallback: true
+
+passport.use('login', new LocalStrategy({
+    passReqToCallback: true,
+    session: false
 },function(req, username, password, done){
     // return done(null, {id:'wowow',name:'Josh'});
     Users.findOne({username: username}).then((doc) => {
         if(doc == null){
             // req.flash('message', {"error": 'Login Failed'});
-            return done(null, false);
+            return done(null, false, {message: 'Invalid username or password'});
             // return done(null, false, {message: {"error": 'Login Failed'}});
         }
         var hash = doc.password;
         bcrypt.compare(password, hash).then((res) => {
             if(res == false){
                 // req.flash('message', {"error": 'Login Failed'});
-                return done(null, false);
+                return done(null, false, {message: 'Invalid username or password'});
                 // return done(null, false, {message: {"error": 'Login Failed'}});
             }else{
                 delete doc.password; // might not be necessary
@@ -44,34 +48,43 @@ passport.use(new LocalStrategy({
     });
 }));
 
-// passport.use('local-signup', new LocalStrategy({
-//     passReqToCallback: true
-// },
-//     function(req, username, password, done){
-//         if(config.restrictedNames.some((prefix) => {return username.toLowerCase().startsWith(prefix)})){
-//             // req.flash('message', {'error': 'Restricted username'});
-//             return done(null, false);
-//         }
-//         Users.findOne({username: username}).then((doc) => {
-//             if(doc != null){
-//                 // req.flash('message', {"error": 'User already exists'});
-//                 return done(null, false);
-//                 // return done(null, false, {message: {"error": 'User already exists'}});
-//             }else{
-//                 bcrypt.hash(password, 12, function(err, hash){
-//                     if(err) return done(err);
-//                     Users.insert({
-//                         username: username,
-//                         password: hash
-//                     }, function(err, user){
-//                         return done(err, user);
-//                     });
-//                 });
-//             }
-//         }).catch((err) => {
-//             return done(err);
-//     });
-// }));
+passport.use('local-signup', new LocalStrategy({
+    session: false
+},
+    function(username, password, done){
+        if(config.restrictedNames.some((prefix) => {return username.toLowerCase().startsWith(prefix)})){
+            // req.flash('message', {'error': 'Restricted username'});
+            return done(null, false, {message: 'Restricted username'});
+        }
+        Users.findOne({username: username}).then((doc) => {
+            if(doc != null){
+                // req.flash('message', {"error": 'User already exists'});
+                return done(null, false, {message: 'User already exists'});
+                // return done(null, false, {message: {"error": 'User already exists'}});
+            }else{
+                bcrypt.hash(password, 12).then((hash) => {
+                    Users.insert({
+                        username: username,
+                        password: hash
+                    }, function(err, user){
+                        return done(err, user);
+                    });
+                }).catch((err) => {
+                    return done(err);
+                });
+            }
+        }).catch((err) => {
+            return done(err);
+    });
+}));
+
+passport.use('jwt', new JWTStrategy({
+    jwtFromRequest: ExtractJWT.fromAuthHeaderWithScheme('jwt'),
+    secretOrKey: config.sessionSecret
+},
+function(jwtpayload, done){
+
+}));
 
 passport.serializeUser(function(user, done) {
     done(null, user._id);
