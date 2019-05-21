@@ -9,12 +9,23 @@ localhost:8000 {
     proxy /.well-known/webfinger localhost:3000 {
         transparent
     }
+
+    proxy /api localhost:3000 {
+        transparent
+    }
+    tls self_signed #remove
 }
 
-# localhost:8000/api/ {
-#     proxy / localhost:3000 {
-#         transparent
-#     }
-# }
+*.localhost:8000 {
+    gzip
+    log ./blog_access.log
 
-# *.localhost:800
+    cors
+
+    proxy / localhost:3000/blog {
+        transparent
+    }
+    tls self_signed #remove
+}
+
+# http.rewrite

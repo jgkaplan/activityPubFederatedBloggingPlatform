@@ -1,3 +1,18 @@
+Running with Vagrant
+====================
+Install Vagrant
+clone this repositore
+`cd` into the directory with this repository
+run `vagrant up`
+and `vagrant ssh` to enter the development enviroment
+In the vagrant machine, `cd /vagrant` to get to the source files.
+
+Halt the vagrant machine with `vagrant halt`, suspend it with `vagrant suspend`, and resume it with `vagrant resume`.
+
+Run `caddy` to start the caddy server (on port 8000),
+and `node .` to start the node server (on port 3000).
+Run `npm run serve` to start the Vue.js development server (on port 8080).
+
 Requirements
 ============
 Potentially openssl if you want to generate a server certificate yourself

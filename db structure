@@ -4,12 +4,33 @@ Users
     name,
     password,
     summary,
-    preferredUsername,
+    username,
     publicKey,
     privateKey,
     keyCreationDate,
-    icon
+    icon,
+    webfinger,
+    actor, //maybe, or just generate
+    following,
+    followers
 }
+
+Posts //maybe not necessary, given the outbox of a user
+{
+    id,
+    ...
+}
+
+URLS
+----
+
+.../u/<username>
+.../u/<username>/inbox
+.../u/<username>/outbox
+.../u/<username>/likes
+.../u/<username>/followers
+.../u/<username>/following
+
 
 {"@context": "https://www.w3.org/ns/activitystreams",
     "type": "Person",

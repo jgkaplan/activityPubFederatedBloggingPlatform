@@ -11,6 +11,7 @@ Pages
             -quotes
             -audio
             -link
+            -polls
             -chat?
         -like
         -reblog
@@ -30,6 +31,22 @@ Pages
     Chat?
 
     Search
+
+activitypub
+    -activities
+        -create
+        -delete
+        -follow
+        -like
+        -undo
+        -update
+        -block
+        -flag
+    -objects
+        ?
+    - remove bcc and bto in sent out objects
+
+parse @username and #topic
 
 Admin
     -ban user
