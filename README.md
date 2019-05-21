@@ -7,7 +7,9 @@ run `vagrant up`
 and `vagrant ssh` to enter the development enviroment
 In the vagrant machine, `cd /vagrant` to get to the source files.
 
-Halt the vagrant machine with `vagrant halt`, suspend it with `vagrant suspend`, and resume it with `vagrant resume`.
+Halt the vagrant machine with `vagrant halt`, , and restart it with `vagrant up`.
+
+Completely remove the vagrant machine and free up all resources associated with it with `vagrant destroy`
 
 Run `caddy` to start the caddy server (on port 8000),
 and `node .` to start the node server (on port 3000).
