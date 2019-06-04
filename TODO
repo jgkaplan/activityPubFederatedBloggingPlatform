@@ -77,4 +77,7 @@ Security and safety
     -key expiration
     -log out of all other browsers
     -password reset
-    -limit size of posts
+    -validate form input
+        -limit size of posts?
+        -username can only contain letters and numbers
+        -limit length of username and password

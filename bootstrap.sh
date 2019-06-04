@@ -17,7 +17,18 @@ sudo apt-get update
 sudo apt-get install -y mongodb-org
 sudo service mongod start
 
+# Cassandra
+echo "deb http://www.apache.org/dist/cassandra/debian 311x main" | sudo tee -a /etc/apt/sources.list.d/cassandra.sources.list
+curl https://www.apache.org/dist/cassandra/KEYS | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install cassandra
+sudo service cassandra start
+echo "CREATE KEYSPACE IF NOT EXISTS activitypubbloggingplatform WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 }; quit;" | cqlsh
+#TODO update config in /etc/cassandra/cassandra.yaml
+
 # Install node packages
 cd /vagrant
 npm install
 npm install -g @vue/cli
+npm install -g elm
+npm install --global uglify-js

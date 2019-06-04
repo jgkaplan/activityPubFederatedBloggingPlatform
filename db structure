@@ -1,23 +1,32 @@
 Users
 {
     id,
-    name,
-    password,
-    summary,
-    username,
+    name : String,
+    password : String,
+    summary : String,
+    username : String,
     publicKey,
     privateKey,
-    keyCreationDate,
+    keyCreationDate : Timestamp,
     icon,
     webfinger,
     actor, //maybe, or just generate
-    following,
-    followers
+    apiKey, // ?
+    following : String list,
+    followers : String list,
+    followersPublic : Bool,
+    followingPublic : Bool,
+    likesPublic: Bool
 }
 
 Posts //maybe not necessary, given the outbox of a user
 {
     id,
+    message,
+    likes, (like count? notes?),
+    creationTime,
+    source, (user)
+    comments (additions ? )
     ...
 }
 

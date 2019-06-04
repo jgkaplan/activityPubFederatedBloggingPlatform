@@ -1,0 +1,28 @@
+1) Basic posting
+================
+User can visit dashboard where all posts are displayed in order
+User can make a text post, which will then appear on the page next time it refreshes
+User can delete a post
+Dashboard should contain 20 posts, then fetch more as the user scrolls to the bottom
+
+
+2) Accounts
+===========
+User can create account
+User can log in to account
+User can log out
+User can delete account
+User can follow and unfollow other accounts by typing their name exactly
+    this includes federated accounts
+User should see posts only associated with the people they follow
+Users posts should be sent out to other people (federated)
+
+
+3) ???????
+==========
+
+
+?) Polishing
+============
+Loading gif or message should appear at the bottom when the user scrolls,
+    or "no more posts" if there are no more to display
