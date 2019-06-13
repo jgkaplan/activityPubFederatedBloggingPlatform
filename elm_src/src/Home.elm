@@ -10,8 +10,8 @@ type alias Model = ()
 type Msg
     = NoOp
 
-init : Model
-init = ()
+init : (Model, Cmd Msg)
+init = ((), Cmd.none)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -24,9 +24,11 @@ view model =
     Document "Home"
     [div []
         [ h1 [] [text "Welcome to the ActivityPub Blogging Platform"]
-        , ul []
-            [ li [] [a [Route.href Route.Home] [text "Home"]]
-            , li [] [a [Route.href Route.Dashboard] [text "Dashboard"]]
+        , nav []
+            [ ul []
+                [ li [] [a [Route.href Route.Home] [text "Home"]]
+                , li [] [a [Route.href Route.Dashboard] [text "Dashboard"]]
+                ]
             ]
         ]
     ]

@@ -30,6 +30,13 @@ Posts //maybe not necessary, given the outbox of a user
     ...
 }
 
+Likes
+{
+    id,
+    fromUser,
+    postId
+}
+
 URLS
 ----
 

@@ -1,0 +1,59 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Main</title>
+    <link rel="stylesheet" href="styles/normalize.css">
+    <link rel="stylesheet" href="styles/style.css">
+    <script src="scripts/elm.min.js"></script>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script>
+        var app = Elm.Main.init({
+            node: document.getElementById('app')
+        });
+        var canGetMorePosts = true;
+        var lastPostId = null;
+
+        app.ports.scrollProcessed.subscribe(function(data) {
+            canGetMorePosts = data.more;
+            lastPostId = data.lastPostId;
+        });
+
+        throttle = (fn, delay) => {
+            let canCall = true;
+            return (...args) => {
+                if (canCall) {
+                    fn.apply(null, args);
+                    canCall = false;
+                    setTimeout(() => {
+                        canCall = true;
+                    }, delay);
+                }
+            }
+        }
+        // debounce = (fn, delay) => {
+        //   let timer
+        //   return (...args) => {
+        //     if (timer) clearTimeout(timer)
+        //     timer = setTimeout(() => {
+        //       fn.apply(null, args)
+        //     }, delay)
+        //   }
+        // }
+
+        //lock-unlock rather than throttle
+        scrollFunction = throttle(function(){
+            if(window.innerHeight + window.pageYOffset >= document.body.offsetHeight && canGetMorePosts){
+                canGetMorePosts = false;
+                app.ports.hasReachedBottom.send(lastPostId);
+            }
+        }, 1000);
+
+        window.onscroll = scrollFunction;
+
+    </script>
+</body>
+</html>

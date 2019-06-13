@@ -5,42 +5,67 @@ const config = require('./config.js');
 const crypto = require('crypto');
 const generateRSAKeypair = require('generate-rsa-keypair');
 
-const cassandra = require('cassandra-driver');
-const client = new cassandra.Client({ contactPoints: ['localhost'], localDataCenter: 'datacenter1', keyspace: 'activitypubbloggingplatform' });
+// const cassandra = require('cassandra-driver');
+// const client = new cassandra.Client({ contactPoints: ['localhost'], localDataCenter: 'datacenter1', keyspace: 'activitypubbloggingplatform' });
+// const Uuid = cassandra.types.Uuid;
+// const TimeUuid = cassandra.types.TimeUuid;
 // client.connect(function (err) {
 //   assert.ifError(err);
 // });
 
-await client.connect();
+const mysql = require('mysql');
+var connection = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'me',
+  password : 'secret',
+  // database : 'my_db'
+});
+
+connection.connect();
+
+const NUM_POSTS_PER_REQUEST = 30;
+
+client.connect();
+
+const postTypes = {
+    TEXT: 'text',
+    IMAGE: 'image',
+    AUDIO: 'audio',
+    VIDEO: 'video'
+}
 
 //Create tables
-const createTablesQueries = [
-    {
-        query: 'CREATE TABLE IF NOT EXISTS users ( \
-            userid timeuuid, \
-            username text PRIMARY KEY, \
-            password text, \
-            email text, \
-            privkey text, \
-            pubkey text, \
-            webfinger text, \
-            actor text, \
-            apikey text \
-        )'
-    },{
-        query: 'CREATE TABLE IF NOT EXISTS posts ( \
-            id timeuuid PRIMARY KEY, \
-            type text \
-            contents text, \
-            title text, \
-            image text \
-            audio text, \
-            video text, \
-            sensitive bool \
-        )'
-    }
-]
-await client.batch(createTablesQueries);
+let query = 'CREATE TABLE IF NOT EXISTS users ( \
+    userid timeuuid, \
+    username text PRIMARY KEY, \
+    password text, \
+    email text, \
+    privkey text, \
+    pubkey text, \
+    webfinger text, \
+    actor text, \
+    apikey text \
+)'
+client.execute(query);
+query = 'CREATE TABLE IF NOT EXISTS posts ( \
+    postid timeuuid, \
+    type text, \
+    contents text, \
+    title text, \
+    image text, \
+    audio text, \
+    video text, \
+    sensitive boolean, \
+    explicit boolean, \
+    PRIMARY KEY (postid) \
+)'
+client.execute(query);
+query = 'CREATE TABLE IF NOT EXISTS likes ( \
+    likeid timeuuid PRIMARY KEY, \
+    username text, \
+    postid timeuuid \
+)'
+client.execute(query);
 
 function createActor(name, domain, pubkey) {
   return {
@@ -77,6 +102,15 @@ function createWebfinger(name, domain) {
   };
 }
 
+function query( sql, args ) {
+    return new Promise((resolve, reject) => {
+        connection.query(sql, args, (err, rows) => {
+            if(err)
+                return reject(err);
+            resolve(rows);
+        });
+    });
+}
 
 module.exports = {
     Users: {
@@ -87,7 +121,33 @@ module.exports = {
         },
         addUser: (username, email, password) => {
             let query = 'INSERT INTO users (userid, username, password, email, privkey, pubkey, webfinger, actor, )'
+            //TODO finish
         }
     },
-    shutdown: () => {await client.shutdown();}
+    Posts: {
+        addPost: (type, title, contents) => {
+            // let query = 'INSERT INTO posts (postid, createdAt, type, contents, title) VALUES (?, ?, ?, ?, ?)'
+            let query = 'INSERT INTO posts (postid, type, contents, title) VALUES (?, ?, ?, ?)'
+            return client.execute(query, [TimeUuid.now(), type, contents, title], {prepare: true});
+        },
+        getPosts: (lastPostId) => {
+            if(lastPostId == null){
+                let query = `SELECT postid, toUnixTimestamp(postId) as createdAt, type, contents, title FROM posts ORDER BY postId DESC LIMIT ${NUM_POSTS_PER_REQUEST}`;
+                return client.execute(query, [], {prepare: true}).then(result => {console.log(result.rows); return result.rows;});
+            }else{
+                let query = `SELECT postid, toUnixTimestamp(postId) as createdAt, type, contents, title FROM posts WHERE postId < ? ORDER BY postId DESC LIMIT ${NUM_POSTS_PER_REQUEST}`;
+                //TODO sort by createdAt and also grab the right posts properly
+                return client.execute(query, [lastPostId], {prepare: true}).then(result => {return result.rows;});
+            }
+        }
+    },
+    Likes: {
+        getLikes: (postId) => {
+            let query = 'SELECT * FROM likes WHERE postID=?';
+            return client.execute(query, [postId], {prepare: true}).then(result => {return result.rows;});
+        }
+    },
+    shutdown: (callback) => {client.end(callback);},
+    postTypes: postTypes,
+    NUM_POSTS_PER_REQUEST: NUM_POSTS_PER_REQUEST
 }

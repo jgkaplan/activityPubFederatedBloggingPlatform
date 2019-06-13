@@ -81,3 +81,7 @@ Security and safety
         -limit size of posts?
         -username can only contain letters and numbers
         -limit length of username and password
+
+
+Other
+    -logging (database logging)

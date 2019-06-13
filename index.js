@@ -19,7 +19,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const JWTStrategy = require('passport-jwt').Strategy;
 const ExtractJWT = require('passport-jwt').ExtractJWT;
 const bcrypt = require('bcrypt');
-// const db = require('./db.js');
+const db = require('./db.js');
 
 function jwtIsNotLoggedOut(jwt){
     //TODO: check if account has been logged out
@@ -278,19 +278,38 @@ app.post('/u/:username/outbox', [
 });
 */
 
+app.get('/', cors(), (req, res) => {
+    res.sendFile(path.join(__dirname, 'elm_src', 'build', 'index.html'));
+});
+
+app.get('/index.html', cors(), (req, res) => {
+    res.sendFile(path.join(__dirname, 'elm_src', 'build', 'index.html'));
+});
+
+app.get('/styles/style.css', cors(), (req, res) => {
+    res.sendFile(path.join(__dirname, 'elm_src', 'build', 'styles', 'style.css'));
+});
+app.get('/styles/normalize.css', cors(), (req, res) => {
+    res.sendFile(path.join(__dirname, 'elm_src', 'build', 'styles', 'normalize.css'));
+});
+app.get('/scripts/elm.min.js', cors(), (req, res) => {
+    res.sendFile(path.join(__dirname, 'elm_src', 'elm.min.js'));
+});
+
+app.post('/addPost', (req, res) => {
+    if(req.body.title != "" && req.body.contents != ""){
+        db.Posts.addPost(db.postTypes.TEXT, req.body.title, req.body.contents).then(() => {
+            res.status(200).end("Added post");
+        });
+    }else{
+        res.end("Invalid post");
+    }
+});
+
 app.get('/api/posts', cors(), (req, res) => {
-    let posts = [{
-        id: 0,
-        type: 'text',
-        title: 'Meow',
-        contents: 'What a wonderful world'
-    },{
-        id: 1,
-        type: 'text',
-        title: 'My Second Post',
-        contents: 'This is my second post'
-    }]
-    res.json({"posts": posts});
+    db.Posts.getPosts(req.header("lastPostId")).then((posts) => {
+        res.json({"posts": posts, "more": posts.length == db.NUM_POSTS_PER_REQUEST});
+    });
 });
 
 //catch 404. this needs to be the last route
@@ -314,6 +333,18 @@ app.all('*', (req,res) => {
 //     console.log(`Listening on port: ${config.httpsPort}`);
 // });
 
-app.listen(config.httpPort, function(){
+const server = app.listen(config.httpPort, function(){
     console.log(`Listening on port: ${config.httpPort}`);
+});
+
+process.on('SIGTERM', () => {
+  console.info('SIGTERM signal received.');
+  console.log('Closing http server.');
+  server.close(() => {
+    console.log('Http server closed.');
+    db.shutdown(() => {
+        process.exit(0):
+    });
+  });
+
 });

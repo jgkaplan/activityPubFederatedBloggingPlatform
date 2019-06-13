@@ -8,6 +8,8 @@ import Html.Lazy exposing (lazy)
 import Http
 import Url exposing (Url)
 import Json.Decode as D
+import Browser.Dom as Dom
+import Task
 --Page imports
 import Home
 import Dashboard
@@ -36,18 +38,9 @@ type alias Model =
 --PageModel is a type wrapping the models of each page
 type PageModel
     = NotFound
+    | Loading --for initial load
     | Home Home.Model
     | Dashboard Dashboard.Model
-
-init : () -> Url -> Nav.Key -> (Model, Cmd Msg)
-init _ url navKey =
-    changeRouteTo (Route.fromUrl url)
-    (Model navKey (Home Home.init))
-
--- type Result error value = Ok value | Err error
-
-
--- UPDATE
 
 type Msg
     = ChangedRoute (Maybe Route.Route)
@@ -56,6 +49,17 @@ type Msg
     | GotHomeMessage Home.Msg
     | GotDashboardMessage Dashboard.Msg
     | GotNotFoundMessage NotFound.Msg
+    | NoOp
+
+init : () -> Url -> Nav.Key -> (Model, Cmd Msg)
+init _ url navKey =
+    changeRouteTo (Route.fromUrl url)
+    (Model navKey Loading)
+
+-- type Result error value = Ok value | Err error
+
+
+-- UPDATE
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -115,8 +119,12 @@ updateWith toModel toMsg key model ( subModel, subCmd ) =
 -- SUBSCRIPTIONS
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
-  Sub.none
+subscriptions {page} =
+  case page of
+      NotFound -> Sub.none
+      Loading -> Sub.none
+      Home _ -> Sub.none
+      Dashboard dash -> Sub.map GotDashboardMessage (Dashboard.subscriptions dash)
 
 -- VIEW
 
@@ -128,6 +136,10 @@ view {key,page} =
             }
     in case page of
         NotFound -> viewPage (NotFound.view) GotNotFoundMessage
+        Loading ->
+            { title = "Loading"
+            , body = [text "Loading"]
+            }
         Home m -> viewPage (Home.view m) GotHomeMessage
 
         Dashboard m -> viewPage (Dashboard.view m) GotDashboardMessage
@@ -141,6 +153,9 @@ view {key,page} =
         )
 --}
 
+resetViewport : Cmd Msg
+resetViewport =
+  Task.perform (\_ -> NoOp) (Dom.setViewport 0 0)
 
 changeRouteTo : Maybe Route.Route -> Model -> ( Model, Cmd Msg )
 changeRouteTo maybeRoute model =
@@ -150,9 +165,9 @@ changeRouteTo maybeRoute model =
             ( Model key NotFound, Cmd.none )
 
         Just Route.Home ->
-            (Home.init, Cmd.none)
+            Home.init
                 |> updateWith Home GotHomeMessage key page
 
         Just Route.Dashboard ->
-            (Dashboard.init, Cmd.none)
+            Dashboard.init
                 |> updateWith Dashboard GotDashboardMessage key page
