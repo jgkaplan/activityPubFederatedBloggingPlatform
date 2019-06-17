@@ -10,6 +10,7 @@
         "lint": "vue-cli-service lint"
     },
     "dependencies": {
+        "@mysql/xdevapi": "8.0.16",
         "axios": "^0.19.0",
         "bcrypt": "^3.0.6",
         "cassandra-driver": "^4.1.0",

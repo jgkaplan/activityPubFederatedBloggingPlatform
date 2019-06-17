@@ -22,17 +22,37 @@
             lastPostId = data.lastPostId;
         });
 
-        throttle = (fn, delay) => {
-            let canCall = true;
-            return (...args) => {
-                if (canCall) {
-                    fn.apply(null, args);
-                    canCall = false;
-                    setTimeout(() => {
-                        canCall = true;
-                    }, delay);
+        // throttle = (fn, delay) => {
+        //     let canCall = true;
+        //     return (...args) => {
+        //         if (canCall) {
+        //             fn.apply(null, args);
+        //             canCall = false;
+        //             setTimeout(() => {
+        //                 canCall = true;
+        //             }, delay);
+        //         }
+        //     }
+        // }
+        const throttle = (func, limit) => {
+          let lastFunc
+          let lastRan
+          return function() {
+            const context = this
+            const args = arguments
+            if (!lastRan) {
+              func.apply(context, args)
+              lastRan = Date.now()
+            } else {
+              clearTimeout(lastFunc)
+              lastFunc = setTimeout(function() {
+                if ((Date.now() - lastRan) >= limit) {
+                  func.apply(context, args)
+                  lastRan = Date.now()
                 }
+              }, limit - (Date.now() - lastRan))
             }
+          }
         }
         // debounce = (fn, delay) => {
         //   let timer
@@ -46,12 +66,11 @@
 
         //lock-unlock rather than throttle
         scrollFunction = throttle(function(){
-            if(window.innerHeight + window.pageYOffset >= document.body.offsetHeight && canGetMorePosts){
+            if(window.innerHeight + window.scrollY >= document.body.scrollHeight && canGetMorePosts){
                 canGetMorePosts = false;
                 app.ports.hasReachedBottom.send(lastPostId);
             }
-        }, 1000);
-
+        }, 500);
         window.onscroll = scrollFunction;
 
     </script>

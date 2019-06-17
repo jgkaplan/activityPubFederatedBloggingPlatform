@@ -85,3 +85,6 @@ Security and safety
 
 Other
     -logging (database logging)
+    -fix infinite scroll function
+    -clicking on image causes it to appear bigger (lightbox style), and clicking outside the image makes it go away
+    -allow admin to enable accounts which are to be followed by default by newly created accounts

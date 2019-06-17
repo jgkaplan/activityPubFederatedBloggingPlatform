@@ -22,3 +22,18 @@ nav ul li {
 .post h1{
     text-align: center;
 }
+
+.loading {
+    text-align: center;
+    color: white;
+}
+
+.error {
+    text-align: center;
+    color: red;
+}
+
+.nomoreposts {
+    text-align:center;
+    color: white;
+}

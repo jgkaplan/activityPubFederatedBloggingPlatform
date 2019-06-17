@@ -35,6 +35,8 @@ sudo DEBIAN_FRONTEND=noninteractive dpkg -i mysql-apt-config_0.8.13-1_all.deb
 sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install mysql-community-server
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install mysql-server
+# mysql -u root -p mysqlRootPassword
+# "CREATE USER 'main'@'localhost' IDENTIFIED BY 'user_password'; GRANT ALL PRIVILEGES ON *.* TO 'main'@'localhost'; FLUSH PRIVILEGES; quit"
 
 # Install node packages
 cd /vagrant

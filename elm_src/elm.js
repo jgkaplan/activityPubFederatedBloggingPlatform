@@ -80,271 +80,6 @@ function A9(fun, a, b, c, d, e, f, g, h, i) {
 
 
 
-var _List_Nil = { $: 0 };
-var _List_Nil_UNUSED = { $: '[]' };
-
-function _List_Cons(hd, tl) { return { $: 1, a: hd, b: tl }; }
-function _List_Cons_UNUSED(hd, tl) { return { $: '::', a: hd, b: tl }; }
-
-
-var _List_cons = F2(_List_Cons);
-
-function _List_fromArray(arr)
-{
-	var out = _List_Nil;
-	for (var i = arr.length; i--; )
-	{
-		out = _List_Cons(arr[i], out);
-	}
-	return out;
-}
-
-function _List_toArray(xs)
-{
-	for (var out = []; xs.b; xs = xs.b) // WHILE_CONS
-	{
-		out.push(xs.a);
-	}
-	return out;
-}
-
-var _List_map2 = F3(function(f, xs, ys)
-{
-	for (var arr = []; xs.b && ys.b; xs = xs.b, ys = ys.b) // WHILE_CONSES
-	{
-		arr.push(A2(f, xs.a, ys.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map3 = F4(function(f, xs, ys, zs)
-{
-	for (var arr = []; xs.b && ys.b && zs.b; xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A3(f, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map4 = F5(function(f, ws, xs, ys, zs)
-{
-	for (var arr = []; ws.b && xs.b && ys.b && zs.b; ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A4(f, ws.a, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map5 = F6(function(f, vs, ws, xs, ys, zs)
-{
-	for (var arr = []; vs.b && ws.b && xs.b && ys.b && zs.b; vs = vs.b, ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A5(f, vs.a, ws.a, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_sortBy = F2(function(f, xs)
-{
-	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
-		return _Utils_cmp(f(a), f(b));
-	}));
-});
-
-var _List_sortWith = F2(function(f, xs)
-{
-	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
-		var ord = A2(f, a, b);
-		return ord === elm$core$Basics$EQ ? 0 : ord === elm$core$Basics$LT ? -1 : 1;
-	}));
-});
-
-
-
-// EQUALITY
-
-function _Utils_eq(x, y)
-{
-	for (
-		var pair, stack = [], isEqual = _Utils_eqHelp(x, y, 0, stack);
-		isEqual && (pair = stack.pop());
-		isEqual = _Utils_eqHelp(pair.a, pair.b, 0, stack)
-		)
-	{}
-
-	return isEqual;
-}
-
-function _Utils_eqHelp(x, y, depth, stack)
-{
-	if (depth > 100)
-	{
-		stack.push(_Utils_Tuple2(x,y));
-		return true;
-	}
-
-	if (x === y)
-	{
-		return true;
-	}
-
-	if (typeof x !== 'object' || x === null || y === null)
-	{
-		typeof x === 'function' && _Debug_crash(5);
-		return false;
-	}
-
-	/**_UNUSED/
-	if (x.$ === 'Set_elm_builtin')
-	{
-		x = elm$core$Set$toList(x);
-		y = elm$core$Set$toList(y);
-	}
-	if (x.$ === 'RBNode_elm_builtin' || x.$ === 'RBEmpty_elm_builtin')
-	{
-		x = elm$core$Dict$toList(x);
-		y = elm$core$Dict$toList(y);
-	}
-	//*/
-
-	/**/
-	if (x.$ < 0)
-	{
-		x = elm$core$Dict$toList(x);
-		y = elm$core$Dict$toList(y);
-	}
-	//*/
-
-	for (var key in x)
-	{
-		if (!_Utils_eqHelp(x[key], y[key], depth + 1, stack))
-		{
-			return false;
-		}
-	}
-	return true;
-}
-
-var _Utils_equal = F2(_Utils_eq);
-var _Utils_notEqual = F2(function(a, b) { return !_Utils_eq(a,b); });
-
-
-
-// COMPARISONS
-
-// Code in Generate/JavaScript.hs, Basics.js, and List.js depends on
-// the particular integer values assigned to LT, EQ, and GT.
-
-function _Utils_cmp(x, y, ord)
-{
-	if (typeof x !== 'object')
-	{
-		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
-	}
-
-	/**_UNUSED/
-	if (x instanceof String)
-	{
-		var a = x.valueOf();
-		var b = y.valueOf();
-		return a === b ? 0 : a < b ? -1 : 1;
-	}
-	//*/
-
-	/**/
-	if (typeof x.$ === 'undefined')
-	//*/
-	/**_UNUSED/
-	if (x.$[0] === '#')
-	//*/
-	{
-		return (ord = _Utils_cmp(x.a, y.a))
-			? ord
-			: (ord = _Utils_cmp(x.b, y.b))
-				? ord
-				: _Utils_cmp(x.c, y.c);
-	}
-
-	// traverse conses until end of a list or a mismatch
-	for (; x.b && y.b && !(ord = _Utils_cmp(x.a, y.a)); x = x.b, y = y.b) {} // WHILE_CONSES
-	return ord || (x.b ? /*GT*/ 1 : y.b ? /*LT*/ -1 : /*EQ*/ 0);
-}
-
-var _Utils_lt = F2(function(a, b) { return _Utils_cmp(a, b) < 0; });
-var _Utils_le = F2(function(a, b) { return _Utils_cmp(a, b) < 1; });
-var _Utils_gt = F2(function(a, b) { return _Utils_cmp(a, b) > 0; });
-var _Utils_ge = F2(function(a, b) { return _Utils_cmp(a, b) >= 0; });
-
-var _Utils_compare = F2(function(x, y)
-{
-	var n = _Utils_cmp(x, y);
-	return n < 0 ? elm$core$Basics$LT : n ? elm$core$Basics$GT : elm$core$Basics$EQ;
-});
-
-
-// COMMON VALUES
-
-var _Utils_Tuple0 = 0;
-var _Utils_Tuple0_UNUSED = { $: '#0' };
-
-function _Utils_Tuple2(a, b) { return { a: a, b: b }; }
-function _Utils_Tuple2_UNUSED(a, b) { return { $: '#2', a: a, b: b }; }
-
-function _Utils_Tuple3(a, b, c) { return { a: a, b: b, c: c }; }
-function _Utils_Tuple3_UNUSED(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
-
-function _Utils_chr(c) { return c; }
-function _Utils_chr_UNUSED(c) { return new String(c); }
-
-
-// RECORDS
-
-function _Utils_update(oldRecord, updatedFields)
-{
-	var newRecord = {};
-
-	for (var key in oldRecord)
-	{
-		newRecord[key] = oldRecord[key];
-	}
-
-	for (var key in updatedFields)
-	{
-		newRecord[key] = updatedFields[key];
-	}
-
-	return newRecord;
-}
-
-
-// APPEND
-
-var _Utils_append = F2(_Utils_ap);
-
-function _Utils_ap(xs, ys)
-{
-	// append Strings
-	if (typeof xs === 'string')
-	{
-		return xs + ys;
-	}
-
-	// append Lists
-	if (!xs.b)
-	{
-		return ys;
-	}
-	var root = _List_Cons(xs.a, ys);
-	xs = xs.b
-	for (var curr = root; xs.b; xs = xs.b) // WHILE_CONS
-	{
-		curr = curr.b = _List_Cons(xs.a, ys);
-	}
-	return root;
-}
-
-
-
 var _JsArray_empty = [];
 
 function _JsArray_singleton(value)
@@ -784,119 +519,277 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.R.A === region.Y.A)
+	if (region.R.C === region.Y.C)
 	{
-		return 'on line ' + region.R.A;
+		return 'on line ' + region.R.C;
 	}
-	return 'on lines ' + region.R.A + ' through ' + region.Y.A;
+	return 'on lines ' + region.R.C + ' through ' + region.Y.C;
 }
 
 
 
-// MATH
+// EQUALITY
 
-var _Basics_add = F2(function(a, b) { return a + b; });
-var _Basics_sub = F2(function(a, b) { return a - b; });
-var _Basics_mul = F2(function(a, b) { return a * b; });
-var _Basics_fdiv = F2(function(a, b) { return a / b; });
-var _Basics_idiv = F2(function(a, b) { return (a / b) | 0; });
-var _Basics_pow = F2(Math.pow);
-
-var _Basics_remainderBy = F2(function(b, a) { return a % b; });
-
-// https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/divmodnote-letter.pdf
-var _Basics_modBy = F2(function(modulus, x)
+function _Utils_eq(x, y)
 {
-	var answer = x % modulus;
-	return modulus === 0
-		? _Debug_crash(11)
-		:
-	((answer > 0 && modulus < 0) || (answer < 0 && modulus > 0))
-		? answer + modulus
-		: answer;
+	for (
+		var pair, stack = [], isEqual = _Utils_eqHelp(x, y, 0, stack);
+		isEqual && (pair = stack.pop());
+		isEqual = _Utils_eqHelp(pair.a, pair.b, 0, stack)
+		)
+	{}
+
+	return isEqual;
+}
+
+function _Utils_eqHelp(x, y, depth, stack)
+{
+	if (depth > 100)
+	{
+		stack.push(_Utils_Tuple2(x,y));
+		return true;
+	}
+
+	if (x === y)
+	{
+		return true;
+	}
+
+	if (typeof x !== 'object' || x === null || y === null)
+	{
+		typeof x === 'function' && _Debug_crash(5);
+		return false;
+	}
+
+	/**_UNUSED/
+	if (x.$ === 'Set_elm_builtin')
+	{
+		x = elm$core$Set$toList(x);
+		y = elm$core$Set$toList(y);
+	}
+	if (x.$ === 'RBNode_elm_builtin' || x.$ === 'RBEmpty_elm_builtin')
+	{
+		x = elm$core$Dict$toList(x);
+		y = elm$core$Dict$toList(y);
+	}
+	//*/
+
+	/**/
+	if (x.$ < 0)
+	{
+		x = elm$core$Dict$toList(x);
+		y = elm$core$Dict$toList(y);
+	}
+	//*/
+
+	for (var key in x)
+	{
+		if (!_Utils_eqHelp(x[key], y[key], depth + 1, stack))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+var _Utils_equal = F2(_Utils_eq);
+var _Utils_notEqual = F2(function(a, b) { return !_Utils_eq(a,b); });
+
+
+
+// COMPARISONS
+
+// Code in Generate/JavaScript.hs, Basics.js, and List.js depends on
+// the particular integer values assigned to LT, EQ, and GT.
+
+function _Utils_cmp(x, y, ord)
+{
+	if (typeof x !== 'object')
+	{
+		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
+	}
+
+	/**_UNUSED/
+	if (x instanceof String)
+	{
+		var a = x.valueOf();
+		var b = y.valueOf();
+		return a === b ? 0 : a < b ? -1 : 1;
+	}
+	//*/
+
+	/**/
+	if (typeof x.$ === 'undefined')
+	//*/
+	/**_UNUSED/
+	if (x.$[0] === '#')
+	//*/
+	{
+		return (ord = _Utils_cmp(x.a, y.a))
+			? ord
+			: (ord = _Utils_cmp(x.b, y.b))
+				? ord
+				: _Utils_cmp(x.c, y.c);
+	}
+
+	// traverse conses until end of a list or a mismatch
+	for (; x.b && y.b && !(ord = _Utils_cmp(x.a, y.a)); x = x.b, y = y.b) {} // WHILE_CONSES
+	return ord || (x.b ? /*GT*/ 1 : y.b ? /*LT*/ -1 : /*EQ*/ 0);
+}
+
+var _Utils_lt = F2(function(a, b) { return _Utils_cmp(a, b) < 0; });
+var _Utils_le = F2(function(a, b) { return _Utils_cmp(a, b) < 1; });
+var _Utils_gt = F2(function(a, b) { return _Utils_cmp(a, b) > 0; });
+var _Utils_ge = F2(function(a, b) { return _Utils_cmp(a, b) >= 0; });
+
+var _Utils_compare = F2(function(x, y)
+{
+	var n = _Utils_cmp(x, y);
+	return n < 0 ? elm$core$Basics$LT : n ? elm$core$Basics$GT : elm$core$Basics$EQ;
 });
 
 
-// TRIGONOMETRY
+// COMMON VALUES
 
-var _Basics_pi = Math.PI;
-var _Basics_e = Math.E;
-var _Basics_cos = Math.cos;
-var _Basics_sin = Math.sin;
-var _Basics_tan = Math.tan;
-var _Basics_acos = Math.acos;
-var _Basics_asin = Math.asin;
-var _Basics_atan = Math.atan;
-var _Basics_atan2 = F2(Math.atan2);
+var _Utils_Tuple0 = 0;
+var _Utils_Tuple0_UNUSED = { $: '#0' };
 
+function _Utils_Tuple2(a, b) { return { a: a, b: b }; }
+function _Utils_Tuple2_UNUSED(a, b) { return { $: '#2', a: a, b: b }; }
 
-// MORE MATH
+function _Utils_Tuple3(a, b, c) { return { a: a, b: b, c: c }; }
+function _Utils_Tuple3_UNUSED(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
 
-function _Basics_toFloat(x) { return x; }
-function _Basics_truncate(n) { return n | 0; }
-function _Basics_isInfinite(n) { return n === Infinity || n === -Infinity; }
-
-var _Basics_ceiling = Math.ceil;
-var _Basics_floor = Math.floor;
-var _Basics_round = Math.round;
-var _Basics_sqrt = Math.sqrt;
-var _Basics_log = Math.log;
-var _Basics_isNaN = isNaN;
+function _Utils_chr(c) { return c; }
+function _Utils_chr_UNUSED(c) { return new String(c); }
 
 
-// BOOLEANS
+// RECORDS
 
-function _Basics_not(bool) { return !bool; }
-var _Basics_and = F2(function(a, b) { return a && b; });
-var _Basics_or  = F2(function(a, b) { return a || b; });
-var _Basics_xor = F2(function(a, b) { return a !== b; });
-
-
-
-function _Char_toCode(char)
+function _Utils_update(oldRecord, updatedFields)
 {
-	var code = char.charCodeAt(0);
-	if (0xD800 <= code && code <= 0xDBFF)
+	var newRecord = {};
+
+	for (var key in oldRecord)
 	{
-		return (code - 0xD800) * 0x400 + char.charCodeAt(1) - 0xDC00 + 0x10000
+		newRecord[key] = oldRecord[key];
 	}
-	return code;
+
+	for (var key in updatedFields)
+	{
+		newRecord[key] = updatedFields[key];
+	}
+
+	return newRecord;
 }
 
-function _Char_fromCode(code)
+
+// APPEND
+
+var _Utils_append = F2(_Utils_ap);
+
+function _Utils_ap(xs, ys)
 {
-	return _Utils_chr(
-		(code < 0 || 0x10FFFF < code)
-			? '\uFFFD'
-			:
-		(code <= 0xFFFF)
-			? String.fromCharCode(code)
-			:
-		(code -= 0x10000,
-			String.fromCharCode(Math.floor(code / 0x400) + 0xD800, code % 0x400 + 0xDC00)
-		)
-	);
+	// append Strings
+	if (typeof xs === 'string')
+	{
+		return xs + ys;
+	}
+
+	// append Lists
+	if (!xs.b)
+	{
+		return ys;
+	}
+	var root = _List_Cons(xs.a, ys);
+	xs = xs.b
+	for (var curr = root; xs.b; xs = xs.b) // WHILE_CONS
+	{
+		curr = curr.b = _List_Cons(xs.a, ys);
+	}
+	return root;
 }
 
-function _Char_toUpper(char)
+
+
+var _List_Nil = { $: 0 };
+var _List_Nil_UNUSED = { $: '[]' };
+
+function _List_Cons(hd, tl) { return { $: 1, a: hd, b: tl }; }
+function _List_Cons_UNUSED(hd, tl) { return { $: '::', a: hd, b: tl }; }
+
+
+var _List_cons = F2(_List_Cons);
+
+function _List_fromArray(arr)
 {
-	return _Utils_chr(char.toUpperCase());
+	var out = _List_Nil;
+	for (var i = arr.length; i--; )
+	{
+		out = _List_Cons(arr[i], out);
+	}
+	return out;
 }
 
-function _Char_toLower(char)
+function _List_toArray(xs)
 {
-	return _Utils_chr(char.toLowerCase());
+	for (var out = []; xs.b; xs = xs.b) // WHILE_CONS
+	{
+		out.push(xs.a);
+	}
+	return out;
 }
 
-function _Char_toLocaleUpper(char)
+var _List_map2 = F3(function(f, xs, ys)
 {
-	return _Utils_chr(char.toLocaleUpperCase());
-}
+	for (var arr = []; xs.b && ys.b; xs = xs.b, ys = ys.b) // WHILE_CONSES
+	{
+		arr.push(A2(f, xs.a, ys.a));
+	}
+	return _List_fromArray(arr);
+});
 
-function _Char_toLocaleLower(char)
+var _List_map3 = F4(function(f, xs, ys, zs)
 {
-	return _Utils_chr(char.toLocaleLowerCase());
-}
+	for (var arr = []; xs.b && ys.b && zs.b; xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A3(f, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map4 = F5(function(f, ws, xs, ys, zs)
+{
+	for (var arr = []; ws.b && xs.b && ys.b && zs.b; ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A4(f, ws.a, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map5 = F6(function(f, vs, ws, xs, ys, zs)
+{
+	for (var arr = []; vs.b && ws.b && xs.b && ys.b && zs.b; vs = vs.b, ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A5(f, vs.a, ws.a, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_sortBy = F2(function(f, xs)
+{
+	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
+		return _Utils_cmp(f(a), f(b));
+	}));
+});
+
+var _List_sortWith = F2(function(f, xs)
+{
+	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
+		var ord = A2(f, a, b);
+		return ord === elm$core$Basics$EQ ? 0 : ord === elm$core$Basics$LT ? -1 : 1;
+	}));
+});
 
 
 
@@ -1209,6 +1102,113 @@ function _String_fromList(chars)
 	return _List_toArray(chars).join('');
 }
 
+
+
+
+// MATH
+
+var _Basics_add = F2(function(a, b) { return a + b; });
+var _Basics_sub = F2(function(a, b) { return a - b; });
+var _Basics_mul = F2(function(a, b) { return a * b; });
+var _Basics_fdiv = F2(function(a, b) { return a / b; });
+var _Basics_idiv = F2(function(a, b) { return (a / b) | 0; });
+var _Basics_pow = F2(Math.pow);
+
+var _Basics_remainderBy = F2(function(b, a) { return a % b; });
+
+// https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/divmodnote-letter.pdf
+var _Basics_modBy = F2(function(modulus, x)
+{
+	var answer = x % modulus;
+	return modulus === 0
+		? _Debug_crash(11)
+		:
+	((answer > 0 && modulus < 0) || (answer < 0 && modulus > 0))
+		? answer + modulus
+		: answer;
+});
+
+
+// TRIGONOMETRY
+
+var _Basics_pi = Math.PI;
+var _Basics_e = Math.E;
+var _Basics_cos = Math.cos;
+var _Basics_sin = Math.sin;
+var _Basics_tan = Math.tan;
+var _Basics_acos = Math.acos;
+var _Basics_asin = Math.asin;
+var _Basics_atan = Math.atan;
+var _Basics_atan2 = F2(Math.atan2);
+
+
+// MORE MATH
+
+function _Basics_toFloat(x) { return x; }
+function _Basics_truncate(n) { return n | 0; }
+function _Basics_isInfinite(n) { return n === Infinity || n === -Infinity; }
+
+var _Basics_ceiling = Math.ceil;
+var _Basics_floor = Math.floor;
+var _Basics_round = Math.round;
+var _Basics_sqrt = Math.sqrt;
+var _Basics_log = Math.log;
+var _Basics_isNaN = isNaN;
+
+
+// BOOLEANS
+
+function _Basics_not(bool) { return !bool; }
+var _Basics_and = F2(function(a, b) { return a && b; });
+var _Basics_or  = F2(function(a, b) { return a || b; });
+var _Basics_xor = F2(function(a, b) { return a !== b; });
+
+
+
+function _Char_toCode(char)
+{
+	var code = char.charCodeAt(0);
+	if (0xD800 <= code && code <= 0xDBFF)
+	{
+		return (code - 0xD800) * 0x400 + char.charCodeAt(1) - 0xDC00 + 0x10000
+	}
+	return code;
+}
+
+function _Char_fromCode(code)
+{
+	return _Utils_chr(
+		(code < 0 || 0x10FFFF < code)
+			? '\uFFFD'
+			:
+		(code <= 0xFFFF)
+			? String.fromCharCode(code)
+			:
+		(code -= 0x10000,
+			String.fromCharCode(Math.floor(code / 0x400) + 0xD800, code % 0x400 + 0xDC00)
+		)
+	);
+}
+
+function _Char_toUpper(char)
+{
+	return _Utils_chr(char.toUpperCase());
+}
+
+function _Char_toLower(char)
+{
+	return _Utils_chr(char.toLowerCase());
+}
+
+function _Char_toLocaleUpper(char)
+{
+	return _Utils_chr(char.toLocaleUpperCase());
+}
+
+function _Char_toLocaleLower(char)
+{
+	return _Utils_chr(char.toLocaleLowerCase());
+}
 
 
 
@@ -4115,7 +4115,7 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 		impl.aT,
 		impl.aQ,
 		function(sendToApp, initialModel) {
-			var divertHrefToApp = impl.C && impl.C(sendToApp)
+			var divertHrefToApp = impl.E && impl.E(sendToApp)
 			var view = impl.aV;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
@@ -4190,7 +4190,7 @@ function _Browser_application(impl)
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
-		C: function(sendToApp)
+		E: function(sendToApp)
 		{
 			key.a = sendToApp;
 			_Browser_window.addEventListener('popstate', key);
@@ -4381,10 +4381,10 @@ function _Browser_getViewport()
 	return {
 		an: _Browser_getScene(),
 		as: {
-			I: _Browser_window.pageXOffset,
-			J: _Browser_window.pageYOffset,
-			y: _Browser_doc.documentElement.clientWidth,
-			t: _Browser_doc.documentElement.clientHeight
+			K: _Browser_window.pageXOffset,
+			L: _Browser_window.pageYOffset,
+			A: _Browser_doc.documentElement.clientWidth,
+			u: _Browser_doc.documentElement.clientHeight
 		}
 	};
 }
@@ -4394,8 +4394,8 @@ function _Browser_getScene()
 	var body = _Browser_doc.body;
 	var elem = _Browser_doc.documentElement;
 	return {
-		y: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		t: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+		A: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		u: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
 
@@ -4419,14 +4419,14 @@ function _Browser_getViewportOf(id)
 	{
 		return {
 			an: {
-				y: node.scrollWidth,
-				t: node.scrollHeight
+				A: node.scrollWidth,
+				u: node.scrollHeight
 			},
 			as: {
-				I: node.scrollLeft,
-				J: node.scrollTop,
-				y: node.clientWidth,
-				t: node.clientHeight
+				K: node.scrollLeft,
+				L: node.scrollTop,
+				A: node.clientWidth,
+				u: node.clientHeight
 			}
 		};
 	});
@@ -4458,16 +4458,16 @@ function _Browser_getElement(id)
 		return {
 			an: _Browser_getScene(),
 			as: {
-				I: x,
-				J: y,
-				y: _Browser_doc.documentElement.clientWidth,
-				t: _Browser_doc.documentElement.clientHeight
+				K: x,
+				L: y,
+				A: _Browser_doc.documentElement.clientWidth,
+				u: _Browser_doc.documentElement.clientHeight
 			},
 			ay: {
-				I: x + rect.left,
-				J: y + rect.top,
-				y: rect.width,
-				t: rect.height
+				K: x + rect.left,
+				L: y + rect.top,
+				A: rect.width,
+				u: rect.height
 			}
 		};
 	});
@@ -4511,18 +4511,21 @@ var author$project$Main$ClickedLink = function (a) {
 var author$project$Main$Loading = {$: 1};
 var author$project$Main$Model = F2(
 	function (key, page) {
-		return {H: key, B: page};
+		return {J: key, D: page};
 	});
+var author$project$Dashboard$Loading = function (a) {
+	return {$: 0, a: a};
+};
 var author$project$Dashboard$GotPosts = function (a) {
 	return {$: 1, a: a};
 };
 var author$project$Post$BlogPostSet = F2(
 	function (posts, hasMore) {
-		return {L: hasMore, O: posts};
+		return {t: hasMore, w: posts};
 	});
 var author$project$Post$BlogPost = F3(
 	function (uuid, createdAt, data) {
-		return {ax: createdAt, K: data, aU: uuid};
+		return {ax: createdAt, M: data, aU: uuid};
 	});
 var author$project$Post$TextPost = elm$core$Basics$identity;
 var author$project$Post$TextPostBody = F2(
@@ -4532,14 +4535,38 @@ var author$project$Post$TextPostBody = F2(
 var elm$core$Basics$identity = function (x) {
 	return x;
 };
-var elm$core$Array$branchFactor = 32;
-var elm$core$Array$Array_elm_builtin = F4(
-	function (a, b, c, d) {
-		return {$: 0, a: a, b: b, c: c, d: d};
-	});
+var elm$core$Maybe$Just = function (a) {
+	return {$: 0, a: a};
+};
+var elm$core$Maybe$Nothing = {$: 1};
 var elm$core$Basics$EQ = 1;
-var elm$core$Basics$GT = 2;
 var elm$core$Basics$LT = 0;
+var elm$core$Elm$JsArray$foldr = _JsArray_foldr;
+var elm$core$Array$foldr = F3(
+	function (func, baseCase, _n0) {
+		var tree = _n0.c;
+		var tail = _n0.d;
+		var helper = F2(
+			function (node, acc) {
+				if (!node.$) {
+					var subTree = node.a;
+					return A3(elm$core$Elm$JsArray$foldr, helper, acc, subTree);
+				} else {
+					var values = node.a;
+					return A3(elm$core$Elm$JsArray$foldr, func, acc, values);
+				}
+			});
+		return A3(
+			elm$core$Elm$JsArray$foldr,
+			helper,
+			A3(elm$core$Elm$JsArray$foldr, func, baseCase, tail),
+			tree);
+	});
+var elm$core$List$cons = _List_cons;
+var elm$core$Array$toList = function (array) {
+	return A3(elm$core$Array$foldr, elm$core$List$cons, _List_Nil, array);
+};
+var elm$core$Basics$GT = 2;
 var elm$core$Dict$foldr = F3(
 	function (func, acc, t) {
 		foldr:
@@ -4565,7 +4592,6 @@ var elm$core$Dict$foldr = F3(
 			}
 		}
 	});
-var elm$core$List$cons = _List_cons;
 var elm$core$Dict$toList = function (dict) {
 	return A3(
 		elm$core$Dict$foldr,
@@ -4593,30 +4619,12 @@ var elm$core$Set$toList = function (_n0) {
 	var dict = _n0;
 	return elm$core$Dict$keys(dict);
 };
-var elm$core$Elm$JsArray$foldr = _JsArray_foldr;
-var elm$core$Array$foldr = F3(
-	function (func, baseCase, _n0) {
-		var tree = _n0.c;
-		var tail = _n0.d;
-		var helper = F2(
-			function (node, acc) {
-				if (!node.$) {
-					var subTree = node.a;
-					return A3(elm$core$Elm$JsArray$foldr, helper, acc, subTree);
-				} else {
-					var values = node.a;
-					return A3(elm$core$Elm$JsArray$foldr, func, acc, values);
-				}
-			});
-		return A3(
-			elm$core$Elm$JsArray$foldr,
-			helper,
-			A3(elm$core$Elm$JsArray$foldr, func, baseCase, tail),
-			tree);
+var elm$core$String$fromInt = _String_fromNumber;
+var elm$core$Array$branchFactor = 32;
+var elm$core$Array$Array_elm_builtin = F4(
+	function (a, b, c, d) {
+		return {$: 0, a: a, b: b, c: c, d: d};
 	});
-var elm$core$Array$toList = function (array) {
-	return A3(elm$core$Array$foldr, elm$core$List$cons, _List_Nil, array);
-};
 var elm$core$Basics$ceiling = _Basics_ceiling;
 var elm$core$Basics$fdiv = _Basics_fdiv;
 var elm$core$Basics$logBase = F2(
@@ -4784,10 +4792,6 @@ var elm$core$Array$initialize = F2(
 			return A5(elm$core$Array$initializeHelp, fn, initialFromIndex, len, _List_Nil, tail);
 		}
 	});
-var elm$core$Maybe$Just = function (a) {
-	return {$: 0, a: a};
-};
-var elm$core$Maybe$Nothing = {$: 1};
 var elm$core$Result$Err = function (a) {
 	return {$: 1, a: a};
 };
@@ -4883,7 +4887,6 @@ var elm$core$List$indexedMap = F2(
 			xs);
 	});
 var elm$core$String$all = _String_all;
-var elm$core$String$fromInt = _String_fromNumber;
 var elm$core$String$join = F2(
 	function (sep, chunks) {
 		return A2(
@@ -5016,7 +5019,10 @@ var elm$json$Json$Decode$string = _Json_decodeString;
 var author$project$Post$textDecoder = A4(
 	elm$json$Json$Decode$map3,
 	author$project$Post$BlogPost,
-	A2(elm$json$Json$Decode$field, 'postid', elm$json$Json$Decode$string),
+	A2(
+		elm$json$Json$Decode$map,
+		elm$core$String$fromInt,
+		A2(elm$json$Json$Decode$field, 'postid', elm$json$Json$Decode$int)),
 	A2(elm$json$Json$Decode$field, 'createdat', elm$json$Json$Decode$int),
 	A2(
 		elm$json$Json$Decode$map,
@@ -5925,14 +5931,14 @@ var elm$http$Http$Header = F2(
 var elm$http$Http$header = elm$http$Http$Header;
 var author$project$Dashboard$getBlogPosts = function (result) {
 	if (!result.$) {
-		var lastPostTime = result.a;
+		var lastPostId = result.a;
 		return elm$http$Http$request(
 			{
 				av: elm$http$Http$emptyBody,
 				_: A2(elm$http$Http$expectJson, author$project$Dashboard$GotPosts, author$project$Post$decoder),
 				aC: _List_fromArray(
 					[
-						A2(elm$http$Http$header, 'lastPostTime', lastPostTime)
+						A2(elm$http$Http$header, 'lastPostId', lastPostId)
 					]),
 				aG: 'GET',
 				aR: elm$core$Maybe$Just(10000),
@@ -5949,7 +5955,7 @@ var author$project$Dashboard$getBlogPosts = function (result) {
 };
 var author$project$Post$emptySet = A2(author$project$Post$BlogPostSet, _List_Nil, true);
 var author$project$Dashboard$init = _Utils_Tuple2(
-	author$project$Post$emptySet,
+	author$project$Dashboard$Loading(author$project$Post$emptySet),
 	author$project$Dashboard$getBlogPosts(elm$core$Maybe$Nothing));
 var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
@@ -5982,8 +5988,8 @@ var author$project$Main$updateWith = F5(
 var author$project$Main$changeRouteTo = F2(
 	function (maybeRoute, model) {
 		var _n0 = model;
-		var key = _n0.H;
-		var page = _n0.B;
+		var key = _n0.J;
+		var page = _n0.D;
 		if (maybeRoute.$ === 1) {
 			return _Utils_Tuple2(
 				A2(author$project$Main$Model, key, author$project$Main$NotFound),
@@ -6262,14 +6268,21 @@ var author$project$Dashboard$GetPosts = function (a) {
 };
 var elm$json$Json$Decode$value = _Json_decodeValue;
 var author$project$Dashboard$hasReachedBottom = _Platform_incomingPort('hasReachedBottom', elm$json$Json$Decode$value);
-var author$project$Dashboard$subscriptions = function (_n0) {
-	return author$project$Dashboard$hasReachedBottom(author$project$Dashboard$GetPosts);
-};
-var elm$core$Platform$Sub$map = _Platform_map;
 var elm$core$Platform$Sub$batch = _Platform_batch;
 var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
+var author$project$Dashboard$subscriptions = function (m) {
+	switch (m.$) {
+		case 0:
+			return elm$core$Platform$Sub$none;
+		case 1:
+			return author$project$Dashboard$hasReachedBottom(author$project$Dashboard$GetPosts);
+		default:
+			return elm$core$Platform$Sub$none;
+	}
+};
+var elm$core$Platform$Sub$map = _Platform_map;
 var author$project$Main$subscriptions = function (_n0) {
-	var page = _n0.B;
+	var page = _n0.D;
 	switch (page.$) {
 		case 0:
 			return elm$core$Platform$Sub$none;
@@ -6284,6 +6297,12 @@ var author$project$Main$subscriptions = function (_n0) {
 				author$project$Main$GotDashboardMessage,
 				author$project$Dashboard$subscriptions(dash));
 	}
+};
+var author$project$Dashboard$Failed = function (a) {
+	return {$: 2, a: a};
+};
+var author$project$Dashboard$Main = function (a) {
+	return {$: 1, a: a};
 };
 var elm$json$Json$Decode$decodeValue = _Json_run;
 var author$project$Dashboard$decodeValue = function (val) {
@@ -6333,52 +6352,68 @@ var elm$json$Json$Encode$object = function (pairs) {
 };
 var author$project$Dashboard$update = F2(
 	function (msg, model) {
-		if (!msg.$) {
-			var lastPostTime = msg.a;
-			return _Utils_Tuple2(
-				model,
-				author$project$Dashboard$getBlogPosts(
-					author$project$Dashboard$decodeValue(lastPostTime)));
-		} else {
-			var result = msg.a;
-			if (result.$ === 1) {
-				var error = result.a;
-				return _Utils_Tuple2(
-					model,
-					author$project$Dashboard$scrollProcessed(
-						elm$json$Json$Encode$object(
-							_List_fromArray(
-								[
-									_Utils_Tuple2('lastPostId', elm$json$Json$Encode$null),
-									_Utils_Tuple2(
-									'more',
-									elm$json$Json$Encode$bool(model.L)),
-									_Utils_Tuple2(
-									'error',
-									elm$json$Json$Encode$string('Failed to get posts'))
-								]))));
+		var _n0 = _Utils_Tuple2(model, msg);
+		_n0$2:
+		while (true) {
+			if (!_n0.b.$) {
+				if (_n0.a.$ === 1) {
+					var blogpostset = _n0.a.a;
+					var lastPostId = _n0.b.a;
+					return _Utils_Tuple2(
+						author$project$Dashboard$Loading(blogpostset),
+						author$project$Dashboard$getBlogPosts(
+							author$project$Dashboard$decodeValue(lastPostId)));
+				} else {
+					break _n0$2;
+				}
 			} else {
-				var posts = result.a.O;
-				var hasMore = result.a.L;
-				return _Utils_Tuple2(
-					{
-						L: hasMore,
-						O: _Utils_ap(model.O, posts)
-					},
-					author$project$Dashboard$scrollProcessed(
-						elm$json$Json$Encode$object(
-							_List_fromArray(
-								[
-									_Utils_Tuple2(
-									'lastPostId',
-									author$project$Dashboard$lastId(posts)),
-									_Utils_Tuple2(
-									'more',
-									elm$json$Json$Encode$bool(hasMore)),
-									_Utils_Tuple2('error', elm$json$Json$Encode$null)
-								]))));
+				if (!_n0.a.$) {
+					var blogpostset = _n0.a.a;
+					var result = _n0.b.a;
+					if (result.$ === 1) {
+						var error = result.a;
+						return _Utils_Tuple2(
+							author$project$Dashboard$Failed(blogpostset),
+							author$project$Dashboard$scrollProcessed(
+								elm$json$Json$Encode$object(
+									_List_fromArray(
+										[
+											_Utils_Tuple2('lastPostId', elm$json$Json$Encode$null),
+											_Utils_Tuple2(
+											'more',
+											elm$json$Json$Encode$bool(blogpostset.t)),
+											_Utils_Tuple2(
+											'error',
+											elm$json$Json$Encode$string('Failed to get posts'))
+										]))));
+					} else {
+						var posts = result.a.w;
+						var hasMore = result.a.t;
+						return _Utils_Tuple2(
+							author$project$Dashboard$Main(
+								{
+									t: hasMore,
+									w: _Utils_ap(blogpostset.w, posts)
+								}),
+							author$project$Dashboard$scrollProcessed(
+								elm$json$Json$Encode$object(
+									_List_fromArray(
+										[
+											_Utils_Tuple2(
+											'lastPostId',
+											author$project$Dashboard$lastId(posts)),
+											_Utils_Tuple2(
+											'more',
+											elm$json$Json$Encode$bool(hasMore)),
+											_Utils_Tuple2('error', elm$json$Json$Encode$null)
+										]))));
+					}
+				} else {
+					break _n0$2;
+				}
 			}
 		}
+		return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 	});
 var author$project$Home$update = F2(
 	function (msg, model) {
@@ -6641,8 +6676,8 @@ var elm$url$Url$toString = function (url) {
 var author$project$Main$update = F2(
 	function (msg, model) {
 		var _n0 = model;
-		var key = _n0.H;
-		var page = _n0.B;
+		var key = _n0.J;
+		var page = _n0.D;
 		var _n1 = _Utils_Tuple2(msg, page);
 		_n1$5:
 		while (true) {
@@ -6746,7 +6781,7 @@ var elm$virtual_dom$VirtualDom$lazy = _VirtualDom_lazy;
 var elm$html$Html$Lazy$lazy = elm$virtual_dom$VirtualDom$lazy;
 var author$project$Post$viewKeyedPost = function (_n0) {
 	var uuid = _n0.aU;
-	var data = _n0.K;
+	var data = _n0.M;
 	var p = data;
 	return _Utils_Tuple2(
 		uuid,
@@ -6758,7 +6793,7 @@ var elm$virtual_dom$VirtualDom$keyedNode = function (tag) {
 };
 var elm$html$Html$Keyed$node = elm$virtual_dom$VirtualDom$keyedNode;
 var author$project$Post$viewPosts = function (_n0) {
-	var posts = _n0.O;
+	var posts = _n0.w;
 	return A3(
 		elm$html$Html$Keyed$node,
 		'div',
@@ -6770,13 +6805,78 @@ var elm$browser$Browser$Document = F2(
 		return {av: body, T: title};
 	});
 var author$project$Dashboard$view = function (model) {
-	return A2(
-		elm$browser$Browser$Document,
-		'Dashboard',
-		_List_fromArray(
-			[
-				author$project$Post$viewPosts(model)
-			]));
+	switch (model.$) {
+		case 2:
+			var blogpostset = model.a;
+			return A2(
+				elm$browser$Browser$Document,
+				'Dashboard',
+				_List_fromArray(
+					[
+						author$project$Post$viewPosts(blogpostset),
+						A2(
+						elm$html$Html$div,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('error')
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('Could not retrieve posts')
+							]))
+					]));
+		case 0:
+			var blogpostset = model.a;
+			return A2(
+				elm$browser$Browser$Document,
+				'Dashboard',
+				_List_fromArray(
+					[
+						author$project$Post$viewPosts(blogpostset),
+						A2(
+						elm$html$Html$div,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('loading')
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('Loading...')
+							]))
+					]));
+		default:
+			var posts = model.a.w;
+			var hasMore = model.a.t;
+			if (hasMore) {
+				return A2(
+					elm$browser$Browser$Document,
+					'Dashboard',
+					_List_fromArray(
+						[
+							author$project$Post$viewPosts(
+							{t: hasMore, w: posts})
+						]));
+			} else {
+				return A2(
+					elm$browser$Browser$Document,
+					'Dashboard',
+					_List_fromArray(
+						[
+							author$project$Post$viewPosts(
+							{t: hasMore, w: posts}),
+							A2(
+							elm$html$Html$div,
+							_List_fromArray(
+								[
+									elm$html$Html$Attributes$class('nomoreposts')
+								]),
+							_List_fromArray(
+								[
+									elm$html$Html$text('No more posts')
+								]))
+						]));
+			}
+	}
 };
 var author$project$Route$routeToString = function (page) {
 	var pieces = function () {
@@ -6913,8 +7013,8 @@ var author$project$NotFound$view = A2(
 var elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
 var elm$html$Html$map = elm$virtual_dom$VirtualDom$map;
 var author$project$Main$view = function (_n0) {
-	var key = _n0.H;
-	var page = _n0.B;
+	var key = _n0.J;
+	var page = _n0.D;
 	var viewPage = F2(
 		function (_n2, toMsg) {
 			var title = _n2.T;

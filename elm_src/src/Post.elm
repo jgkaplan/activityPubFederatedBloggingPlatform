@@ -51,7 +51,7 @@ decoder =
 textDecoder : D.Decoder BlogPost
 textDecoder =
     D.map3 BlogPost
-        (D.field "postid" D.string)
+        (D.map String.fromInt (D.field "postid" D.int))
         (D.field "createdat" D.int)
         (D.map TextPost (
             D.map2 TextPostBody

@@ -332,19 +332,18 @@ app.all('*', (req,res) => {
 //     }
 //     console.log(`Listening on port: ${config.httpsPort}`);
 // });
-
-const server = app.listen(config.httpPort, function(){
-    console.log(`Listening on port: ${config.httpPort}`);
-});
-
-process.on('SIGTERM', () => {
-  console.info('SIGTERM signal received.');
-  console.log('Closing http server.');
-  server.close(() => {
-    console.log('Http server closed.');
-    db.shutdown(() => {
-        process.exit(0):
+db.init().then(() => {
+    const server = app.listen(config.httpPort, function(){
+        console.log(`Listening on port: ${config.httpPort}`);
     });
-  });
-
+    process.on('SIGTERM', () => {
+      console.info('SIGTERM signal received.');
+      console.log('Closing http server.');
+      server.close(() => {
+        console.log('Http server closed.');
+        db.shutdown().then(() => {
+            process.exit(0);
+        });
+      });
+    });
 });

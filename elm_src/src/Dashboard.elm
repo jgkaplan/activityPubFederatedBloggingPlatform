@@ -2,6 +2,7 @@ port module Dashboard exposing (..)
 
 import Browser exposing (Document)
 import Html exposing (..)
+import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Post as P exposing (BlogPost, BlogPostSet, viewPosts)
 import Http
@@ -10,21 +11,24 @@ import Task
 import Json.Encode as E
 import Json.Decode as D
 
-type alias Model = BlogPostSet
+type Model
+    = Loading BlogPostSet
+    | Main BlogPostSet
+    | Failed BlogPostSet
 
 type Msg
     = GetPosts E.Value
     | GotPosts (Result Http.Error BlogPostSet)
 
 init : (Model, Cmd Msg)
-init = (P.emptySet, getBlogPosts Nothing)
+init = (Loading P.emptySet, getBlogPosts Nothing)
 
 getBlogPosts : Maybe String -> Cmd Msg
 getBlogPosts result =
     case result of
-        Just lastPostTime ->
+        Just lastPostId ->
             Http.request { method = "GET"
-                , headers = [Http.header "lastPostTime" lastPostTime]
+                , headers = [Http.header "lastPostId" lastPostId]
                 , url = "http://localhost:3000/api/posts"
                 , body = Http.emptyBody
                 , expect = Http.expectJson GotPosts P.decoder
@@ -55,8 +59,10 @@ lastId posts = case posts of
     x::xs -> lastId xs
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
-    hasReachedBottom GetPosts
+subscriptions m = case m of
+    Loading _ -> Sub.none
+    Main _ -> hasReachedBottom GetPosts
+    Failed _ -> Sub.none
 
 decodeValue : E.Value -> Maybe String
 decodeValue val = case D.decodeValue D.string val of
@@ -65,23 +71,23 @@ decodeValue val = case D.decodeValue D.string val of
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-    case msg of
-        GetPosts lastPostTime ->
-            (model, getBlogPosts (decodeValue lastPostTime))
-        GotPosts result ->
+    case (model, msg) of
+        (Main blogpostset, GetPosts lastPostId) ->
+            (Loading blogpostset, getBlogPosts (decodeValue lastPostId))
+        (Loading blogpostset, GotPosts result) ->
             case result of
                 Err error ->
-                    ( model
+                    ( Failed blogpostset
                     , scrollProcessed
                         ( E.object
                             [ ("lastPostId", E.null)
-                            , ("more", E.bool model.hasMore)
+                            , ("more", E.bool blogpostset.hasMore)
                             , ("error", E.string "Failed to get posts")
                             ]
                         )
                     )
                 Ok {posts, hasMore} ->
-                    ( {posts = model.posts ++ posts, hasMore = hasMore}
+                    ( Main {posts = blogpostset.posts ++ posts, hasMore = hasMore}
                     , scrollProcessed
                         ( E.object
                             [ ("lastPostId", lastId posts)
@@ -90,12 +96,32 @@ update msg model =
                             ]
                         )
                     )
+        (_, _) -> (model, Cmd.none)
 
 
 
 view : Model -> Document Msg
 view model =
-    Document "Dashboard"
-    [ viewPosts model
-    --, button [ onClick (GetPosts Nothing)] [ text "Get Posts" ]
-    ]
+    case model of
+        Failed blogpostset ->
+            Document "Dashboard"
+            [ viewPosts blogpostset
+            , div [class "error"] [text "Could not retrieve posts"]
+            ]
+        Loading blogpostset ->
+            Document "Dashboard"
+            [ viewPosts blogpostset
+            , div [class "loading"] [text "Loading..."]
+            ]
+        Main {posts, hasMore} ->
+            case hasMore of
+                True ->
+                    Document "Dashboard"
+                    [ viewPosts {posts=posts, hasMore=hasMore}
+                    ]
+                False ->
+                    Document "Dashboard"
+                    [ viewPosts {posts=posts, hasMore=hasMore}
+                    , div [class "nomoreposts"] [text "No more posts"]
+                    --, button [ onClick (GetPosts Nothing)] [ text "Get Posts" ]
+                    ]
