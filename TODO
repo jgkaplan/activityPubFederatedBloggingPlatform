@@ -88,3 +88,6 @@ Other
     -fix infinite scroll function
     -clicking on image causes it to appear bigger (lightbox style), and clicking outside the image makes it go away
     -allow admin to enable accounts which are to be followed by default by newly created accounts
+    -scroll to top when refreshing page
+    -unload posts higher up in the page and reload them when you scroll up
+    -contact information for security problems at well-known/security or something like that

@@ -67,3 +67,5 @@ typings/
 
 # vagrant
 .vagrant
+
+sapper_test/

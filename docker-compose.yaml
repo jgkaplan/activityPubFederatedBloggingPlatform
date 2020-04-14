@@ -1,0 +1,18 @@
+version: '3.7'
+services:
+    caddy:
+        image: "caddy:2.0.0"
+        ports:
+            - "443"
+        volumes:
+            - ./Caddyfile:/etc/caddy/Caddyfile
+        depends_on:
+            - web
+    web:
+        build: ./app
+        ports:
+            - "3000"
+        volumes:
+            - ./app:/src
+        environment:
+            NODE_ENV: development

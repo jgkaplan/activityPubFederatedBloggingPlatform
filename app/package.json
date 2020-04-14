@@ -1,0 +1,34 @@
+{
+  "name": "activitypubbloggingplatform",
+  "version": "0.1.0",
+  "description": "A federated blogging platform built on the activitypub format",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "dev": "sapper dev",
+    "build": "sapper build",
+    "export": "sapper export",
+    "start": "node __sapper__/build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jgkaplan/activityPubFederatedBloggingPlatform.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jgkaplan/activityPubFederatedBloggingPlatform/issues"
+  },
+  "homepage": "https://github.com/jgkaplan/activityPubFederatedBloggingPlatform#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "sapper": "^0.27.12",
+    "svelte": "^3.20.1",
+    "svelte-loader": "^2.13.6",
+    "webpack": "^4.42.1"
+  }
+}

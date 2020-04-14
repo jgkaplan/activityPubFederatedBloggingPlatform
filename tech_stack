@@ -1,0 +1,21 @@
+Backend
+-------
+Node.js
+Express
+Sapper
+Caddy / LetsEncrypt
+
+Frontend
+--------
+Svelte
+(TODO) CSS library? (Tailwind?)
+BlurHash (for images)
+
+Management
+----------
+docker
+docker-compose
+
+Bundler
+-------
+Webpack
