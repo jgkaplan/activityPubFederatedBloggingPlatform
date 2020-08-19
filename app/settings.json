@@ -1,0 +1,6 @@
+{
+    "CHARACTER_LIMIT": 10000,
+    "FOLLOWER_COUNT_VISIBLE": false,
+    "NSFW_ALLOWED": true,
+    "RESTRICTED_NAMES": ["admin", "administrator", "moderator", "owner"]
+}

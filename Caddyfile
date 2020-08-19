@@ -1,0 +1,18 @@
+#use environment variable for name
+#so everything can be configured in docker-compose.yaml
+
+#serve static resources directly
+#reverse proxy api requests
+# http://{$SITE_ADDRESS} {
+https://{$SITE_ADDRESS} {
+    encode zstd gzip
+    file_server /static/*
+    reverse_proxy web:3000
+}
+
+#TODO: remove http for production
+#individual blogs should be sent through reverse proxy
+#http://*.{$SITE_ADDRESS} {
+*.{$SITE_ADDRESS} {
+    respond "hi"
+}

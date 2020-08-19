@@ -1,18 +1,28 @@
 version: '3.7'
 services:
     caddy:
-        image: "caddy:2.0.0"
+        image: "caddy"
         ports:
-            - "443"
+            - "443:443"
+            - "8080:8080"
         volumes:
             - ./Caddyfile:/etc/caddy/Caddyfile
+            - ./app/static:/static
+        environment:
+            SITE_ADDRESS: localhost:8080
         depends_on:
             - web
     web:
         build: ./app
-        ports:
-            - "3000"
         volumes:
             - ./app:/src
         environment:
             NODE_ENV: development
+            PORT: 3000
+    db:
+         image: arangodb:latest
+         restart: always
+         environment:
+           ARANGO_ROOT_PASSWORD: **changeme**
+         volumes:
+           - ./dbstore/arangodb_data:/var/lib/arangodb3

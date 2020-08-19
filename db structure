@@ -37,6 +37,13 @@ Likes
     postId
 }
 
+Blogs
+{
+    id,
+    url,
+    html
+}
+
 URLS
 ----
 

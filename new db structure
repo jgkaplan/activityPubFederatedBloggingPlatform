@@ -1,0 +1,14 @@
+each account is a User
+
+each User has settings, Blog(s)
+
+each Blog has followers, following, likes, posts, theme, blog_id (immutable), blog name (mutable), description
+
+Post
+    tags
+    title
+    body
+        text/image/video/quote/chat
+    number of likes & reblogs
+    comments (ehhh)
+    source blog
